@@ -1,3 +1,25 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+ext {
+
+    drivers = ["firefox", "chrome", "safari", "phantomJs"]
+
+    chromeDriverVersion = '2.27'
+    geckoDriverVersion = '0.14.0'
+    phantomJsVersion = '2.1.1'
+
+    serenityCoreVersion = '1.2.3-rc.2'
+    serenityCucumberVersion = '1.1.23'
+
+    
+
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'net.serenity-bdd.aggregator'
+apply from: "gradle/osSpecificDownloads.gradle"
+
 repositories {
     jcenter()
     mavenLocal()
@@ -9,20 +31,48 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("net.serenity-bdd:serenity-gradle-plugin:1.1.13")
+        classpath("net.serenity-bdd:serenity-gradle-plugin:1.2.3-rc.3")
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'net.serenity-bdd.aggregator'
-
 dependencies {
-    compile 'net.serenity-bdd:serenity-core:1.1.13'
-    compile 'net.serenity-bdd:serenity-cucumber:1.1.1'
+    compile 'net.serenity-bdd:serenity-core:1.2.3-rc.3'
+    compile 'net.serenity-bdd:serenity-cucumber:1.1.23'
     testCompile('junit:junit:4.12')
-    compile('org.assertj:assertj-core:1.7.0')
-//    compile('com.googlecode.lambdaj:lambdaj:2.3.3')
+    compile('org.assertj:assertj-core:3.6.2')
+    compile('com.googlecode.lambdaj:lambdaj:2.3.3')
+    testCompile('net.serenity-bdd:serenity-screenplay:1.2.3-rc.3')
+}
+
+drivers.each { driver ->
+    task "${driver}Test"(type: Test) {
+        systemProperty "webdriver.driver", driver
+    }
+}
+
+chromeTest {
+    dependsOn unzipChromeDriver
+
+    def chromedriverFilename = Os.isFamily(Os.FAMILY_WINDOWS) ? "chromedriver.exe" : "chromedriver"
+    systemProperty "webdriver.chrome.driver", new File(unzipChromeDriver.outputs.files.singleFile, chromedriverFilename).absolutePath
+}
+
+firefoxTest {
+    dependsOn unzipGeckoDriver
+
+    def geckodriverFilename = Os.isFamily(Os.FAMILY_WINDOWS) ? "geckodriver.exe" : "geckodriver"
+    systemProperty "webdriver.gecko.driver", new File(unzipGeckoDriver.outputs.files.singleFile, geckodriverFilename).absolutePath
+}
+
+phantomJsTest {
+    dependsOn unzipPhantomJs
+
+    def phantomJsFilename = Os.isFamily(Os.FAMILY_WINDOWS) ? "phantomjs.exe" : "bin/phantomjs"
+    systemProperty "phantomjs.binary.path", new File(unzipPhantomJs.outputs.files.singleFile, phantomJsFilename).absolutePath
+}
+
+test {
+    dependsOn drivers.collect { tasks["${it}Test"] }
+    enabled = false
 }
 gradle.startParameter.continueOnFailure = true
