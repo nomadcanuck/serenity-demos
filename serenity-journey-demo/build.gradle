@@ -8,10 +8,8 @@ ext {
     geckoDriverVersion = '0.14.0'
     phantomJsVersion = '2.1.1'
 
-    serenityCoreVersion = '1.2.3-rc.2'
-    serenityCucumberVersion = '1.1.23'
-
-    
+//    serenityCoreVersion = "1.2.3-rc.3"
+    serenityCucumberVersion = "1.1.23"
 
 }
 
@@ -26,22 +24,26 @@ repositories {
 }
 
 buildscript {
+    ext {
+        serenityCoreVersion = "1.2.3-rc.3"
+    }
+
     repositories {
         mavenLocal()
         jcenter()
     }
     dependencies {
-        classpath("net.serenity-bdd:serenity-gradle-plugin:1.2.3-rc.3")
+        classpath "net.serenity-bdd:serenity-gradle-plugin:$serenityCoreVersion"
     }
 }
 
 dependencies {
-    compile 'net.serenity-bdd:serenity-core:1.2.3-rc.3'
-    compile 'net.serenity-bdd:serenity-cucumber:1.1.23'
-    testCompile('junit:junit:4.12')
-    compile('org.assertj:assertj-core:3.6.2')
-    compile('com.googlecode.lambdaj:lambdaj:2.3.3')
-    testCompile('net.serenity-bdd:serenity-screenplay:1.2.3-rc.3')
+    compile "net.serenity-bdd:serenity-core:$serenityCoreVersion"
+    compile "net.serenity-bdd:serenity-cucumber:$serenityCucumberVersion"
+    testCompile 'junit:junit:4.12'
+    compile 'org.assertj:assertj-core:3.6.2'
+    compile 'com.googlecode.lambdaj:lambdaj:2.3.3'
+    testCompile "net.serenity-bdd:serenity-screenplay:$serenityCoreVersion"
 }
 
 drivers.each { driver ->
